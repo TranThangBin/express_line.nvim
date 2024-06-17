@@ -1,5 +1,3 @@
-
-
 -- TODO:
 --   T N   For 'tabline': start of tab page N label.  Use %T or %X to end
 --         the label.  Clicking this label with left mouse button switches
@@ -34,4 +32,3 @@
 --            this label.
 --         Note: to test whether your version of Neovim contains this
 --               feature use `has('tablineat')`.
-

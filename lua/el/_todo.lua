@@ -1,4 +1,3 @@
-
 --   { NF  Evaluate expression between '%{' and '}' and substitute result.
 --         Note that there is no '%' before the closing '}'.
 --   ( -   Start of item group.  Can be used for setting the width and
@@ -12,7 +11,6 @@
 --         be separated by an equal number of spaces.
 --         No width fields allowed.
 
-
 -- Highlights
 --   # -   Set highlight group.  The name must follow and then a # again.
 --         Thus use %#HLname# for highlight group HLname.  The same
@@ -23,7 +21,6 @@
 --         The difference between User{N} and StatusLine  will be applied
 --         to StatusLineNC for the statusline of non-current windows.
 --         The number N must be between 1 and 9.  See |hl-User1..9|
-
 
 -- Remove this?
 _ = [[

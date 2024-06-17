@@ -1,38 +1,40 @@
-local log = require('el.log')
-local processor = require('el.processor')
+-- NOTE: snooze the unused variable
+--- @diagnostic disable-next-line
+local log = require "el.log"
+local processor = require "el.processor"
 
 local sections = {}
 
-sections.split = '%='
+sections.split = "%="
 
 sections.collapse_builtin = function(items)
-  return {'%(', items, '%)'}
+  return { "%(", items, "%)" }
 end
 
 sections.left_subsection = function(config)
   vim.validate {
-    items = { config.items, 't' },
+    items = { config.items, "t" },
 
-    highlight = { config.highlight, 's', true },
-    divider = { config.divider, 's', true },
-    builtin_only = { config.builtin_only, 'b', true },
+    highlight = { config.highlight, "s", true },
+    divider = { config.divider, "s", true },
+    builtin_only = { config.builtin_only, "b", true },
   }
 
-  local divider = config.divider or '>>'
+  local divider = config.divider or ">>"
   local highlight = config.highlight or nil
   local builtin_only = config.builtin_only or nil
 
   local to_insert = {}
 
   if highlight ~= nil then
-    table.insert(to_insert, string.format('%%#%s#', highlight))
+    table.insert(to_insert, string.format("%%#%s#", highlight))
   end
 
   table.insert(to_insert, config.items)
-  table.insert(to_insert, string.format(' %s ', divider))
+  table.insert(to_insert, string.format(" %s ", divider))
 
   if highlight ~= nil then
-    table.insert(to_insert, '%*')
+    table.insert(to_insert, "%*")
   end
 
   if builtin_only then
@@ -42,19 +44,18 @@ sections.left_subsection = function(config)
   return to_insert
 end
 
-
 sections.gen_one_highlight = function(contents)
   if type(contents) == "string" then
     return function(_, _, higroup)
-      return string.format('%s#%s#%s%%*', '%', higroup, contents)
+      return string.format("%s#%s#%s%%*", "%", higroup, contents)
     end
   elseif type(contents) == "function" then
     return function(window, buffer, higroup)
-      return string.format('%s#%s#%s%%*', '%', higroup, contents(window, buffer))
+      return string.format("%s#%s#%s%%*", "%", higroup, contents(window, buffer))
     end
-  --[[
+    --[[
   elseif type(contents) == "table" then
-    -- TODO: This might not work with nested tables ? 
+    -- TODO: This might not work with nested tables ?
     return function()
       -- return table.concat(vim.tbl_flatten(contents), '')
       return '<tbl>'
@@ -84,7 +85,7 @@ sections.highlight = function(higroup, contents)
           table.insert(highlights, v(higroup, window, buffer))
         end
 
-        return table.concat(highlights, '')
+        return table.concat(highlights, "")
       end
     else
       local resolved = sections.gen_one_highlight(contents)
@@ -121,7 +122,7 @@ end
 ---                                 If function, call function(win, buf)
 sections.filetype = function(filetypes, contents)
   local acceptable_fts = {}
-  if type(filetypes) == 'string' then
+  if type(filetypes) == "string" then
     acceptable_fts[filetypes] = true
   else
     for _, ft in ipairs(filetypes) do
@@ -134,7 +135,7 @@ sections.filetype = function(filetypes, contents)
       return
     end
 
-    if type(contents) == 'string' then
+    if type(contents) == "string" then
       return contents
     else
       return contents(window, buffer)
@@ -152,21 +153,23 @@ sections.maximum_width = function(contents, max_width, opts)
 
   opts = opts or {}
 
-  local trailing = opts.trailing or '…'
+  local trailing = opts.trailing or "…"
   if not trailing then
-    trailing = ''
+    trailing = ""
   end
 
   local get_cutoff
-  if type(max_width) == 'number' then
+  if type(max_width) == "number" then
     if max_width < 1 then
       get_cutoff = function(window)
         return math.ceil(max_width * vim.api.nvim_win_get_width(window.win_id))
       end
     else
-      get_cutoff = function() return max_width end
+      get_cutoff = function()
+        return max_width
+      end
     end
-  elseif type(max_width) == 'function' then
+  elseif type(max_width) == "function" then
     get_cutoff = max_width
   end
 
@@ -179,20 +182,23 @@ sections.maximum_width = function(contents, max_width, opts)
       return nil
     end
 
+    -- NOTE: is this function supposed to take 2 arguments
+    --- @diagnostic disable-next-line
     local cutoff = get_cutoff(window, buffer)
 
-    return value, function(result)
-      local len = #result
-      if len > cutoff then
-        if truncate_right then
-          return string.sub(result, 1, cutoff + 1) .. trailing
-        else
-          return trailing .. string.sub(result, len - cutoff, len)
+    return value,
+      function(result)
+        local len = #result
+        if len > cutoff then
+          if truncate_right then
+            return string.sub(result, 1, cutoff + 1) .. trailing
+          else
+            return trailing .. string.sub(result, len - cutoff, len)
+          end
         end
-      end
 
-      return result
-    end
+        return result
+      end
   end
 end
 

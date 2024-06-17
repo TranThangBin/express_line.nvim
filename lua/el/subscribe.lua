@@ -1,6 +1,6 @@
-local helper = require('el.helper')
-local log = require('el.log')
-local meta = require('el.meta')
+local helper = require "el.helper"
+local log = require "el.log"
+local meta = require "el.meta"
 
 -- TODO:
 -- Should not error when the variable doesn't exist
@@ -19,14 +19,14 @@ subscribe._reload = function()
     __index = function(t, k)
       rawset(t, k, {})
       return rawget(t, k)
-    end
+    end,
   })
 
   _ElUserSubscriptions = setmetatable({}, {
     __index = function(t, k)
       rawset(t, k, {})
       return rawget(t, k)
-    end
+    end,
   })
 end
 
@@ -62,12 +62,19 @@ subscribe.autocmd = function(identifier, name, pattern, callback)
 
   table.insert(_current_callbacks, callback)
 
-  vim.cmd(string.format(
-    [[autocmd %s %s :lua require("el.subscribe")._process_callback(%s)]]<
-    name,
-    pattern,
-    #_current_callbacks
-  ))
+  vim.api.nvim_create_autocmd(name, {
+    pattern = pattern,
+    callback = function()
+      subscribe._process_callbacks(#_current_callbacks)
+    end,
+  })
+
+  -- vim.cmd(string.format(
+  --   [[autocmd %s %s :lua require("el.subscribe")._process_callback(%s)]]<
+  --   name,
+  --   pattern,
+  --   #_current_callbacks
+  -- ))
 end
 
 --- Subscribe to a buffer autocmd with a lua callback.
@@ -82,15 +89,20 @@ subscribe.buf_autocmd = function(identifier, au_events, callback)
 
       vim.cmd [[augroup ElBufSubscriptions]]
       -- TODO: When we add native lua callbacks to neovim for autocmds, we can make this prettier.
-      vim.cmd(string.format(
-        [[autocmd %s <buffer=%s> :lua require("el.subscribe")._process_buf_callback(%s, "%s")]],
-        au_events, buffer.bufnr, buffer.bufnr, identifier
-      ))
+      vim.cmd(
+        string.format(
+          [[autocmd %s <buffer=%s> :lua require("el.subscribe")._process_buf_callback(%s, "%s")]],
+          au_events,
+          buffer.bufnr,
+          buffer.bufnr,
+          identifier
+        )
+      )
       vim.cmd [[augroup END]]
 
       _ElBufSubscriptions[buffer.bufnr][identifier] = callback
 
-      vim.api.nvim_buf_set_var(buffer.bufnr, identifier, callback(nil, buffer) or '')
+      vim.api.nvim_buf_set_var(buffer.bufnr, identifier, callback(nil, buffer) or "")
     end
 
     -- nvim_buf_get_var shouldn't return nil, because we set the buffer var to '' if callback returns nil
@@ -119,23 +131,28 @@ subscribe.user_autocmd = function(identifier, au_events, callback)
       log.debug("Generating user callback for", identifier, buffer.bufnr)
 
       vim.cmd [[augroup ElUserSubscriptions]]
-      vim.cmd(string.format(
-        [[autocmd User %s :lua require("el.subscribe")._process_user_callback(%s, "%s")]],
-        au_events, buffer.bufnr, identifier
-      ))
+      vim.cmd(
+        string.format(
+          [[autocmd User %s :lua require("el.subscribe")._process_user_callback(%s, "%s")]],
+          au_events,
+          buffer.bufnr,
+          identifier
+        )
+      )
       vim.cmd [[augroup END]]
 
       _ElUserSubscriptions[buffer.bufnr][identifier] = callback
 
-      vim.api.nvim_buf_set_var(buffer.bufnr, identifier, callback(nil, buffer) or '')
+      vim.api.nvim_buf_set_var(buffer.bufnr, identifier, callback(nil, buffer) or "")
     end
 
     return helper.nvim_buf_get_var(buffer.bufnr, identifier)
   end
 end
 
-subscribe._process_callbacks = function(identifier)
-end
+-- NOTE: snooze the unused variable
+--- @diagnostic disable-next-line
+subscribe._process_callbacks = function(identifier) end
 
 subscribe._process_buf_callback = function(bufnr, identifier)
   local cb = _ElBufSubscriptions[bufnr][identifier]
@@ -145,11 +162,7 @@ subscribe._process_buf_callback = function(bufnr, identifier)
   end
 
   local res = cb(nil, meta.Buffer:new(bufnr))
-  local ok, msg = pcall(vim.api.nvim_buf_set_var,
-    bufnr,
-    identifier,
-    res or ''
-  )
+  local ok, msg = pcall(vim.api.nvim_buf_set_var, bufnr, identifier, res or "")
 
   if not ok then
     log.debug(msg, res, bufnr, identifier)
@@ -164,20 +177,14 @@ subscribe._process_user_callback = function(bufnr, identifier)
   end
 
   local res = cb(nil, meta.Buffer:new(bufnr))
-  local ok, msg = pcall(vim.api.nvim_buf_set_var,
-    bufnr,
-    identifier,
-    res or ''
-  )
+  local ok, msg = pcall(vim.api.nvim_buf_set_var, bufnr, identifier, res or "")
 
   if not ok then
     log.debug(msg, res, bufnr, identifier)
   end
-
 end
 
-subscribe.option_set = function()
-end
+subscribe.option_set = function() end
 
 --[==[
 local option_callbacks = setmetatable({}, {
