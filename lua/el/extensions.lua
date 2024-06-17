@@ -37,8 +37,8 @@ end
 
 extensions.git_changes = function(_, buffer)
   if
-    vim.api.nvim_buf_get_option(buffer.bufnr, "bufhidden") ~= ""
-    or vim.api.nvim_buf_get_option(buffer.bufnr, "buftype") == "nofile"
+    vim.api.nvim_get_option_value("bufhidden", { buf = buffer.bufnr }) ~= ""
+    or vim.api.nvim_get_option_value("buftype", { buf = buffer.bufnr }) == "nofile"
   then
     return
   end
@@ -123,6 +123,8 @@ extensions.file_icon = function(_, buffer)
   return ok and icon or ""
 end
 
+-- NOTE: snooze the unused local 
+--- @diagnostic disable-next-line
 extensions.git_icon = function(_, buffer)
   local ok, icon = pcall(function()
     return require("nvim-web-devicons").get_icon ".gitattributes"

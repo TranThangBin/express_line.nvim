@@ -13,7 +13,6 @@
 --  The thing is, `filetype` gets looked up only once and we pass the buffer object around to the calls.
 --
 
-
 -- Other TODO:
 --  Should be possible to attach your own "lookups" to buffer,
 --      so that you can get the same (sometimes expensive) behavior.
@@ -24,7 +23,7 @@ local meta = {}
 
 local buf_lookups = {
   filetype = function(buffer)
-    return vim.api.nvim_buf_get_option(buffer.bufnr, 'filetype')
+    return vim.api.nvim_get_option_value("filetype", { bufnr = buffer.bufnr })
   end,
 
   name = function(buffer)
@@ -32,20 +31,20 @@ local buf_lookups = {
   end,
 
   extension = function(buffer)
-    return vim.fn.fnamemodify(buffer.name, ':e')
+    return vim.fn.fnamemodify(buffer.name, ":e")
   end,
 
-  is_git = function(buffer)
-    return
-  end,
+  -- NOTE: snooze the unused local
+  --- @diagnostic disable-next-line
+  is_git = function(buffer) end,
 
   lsp = function(buffer)
-    return not vim.tbl_isempty(vim.tbl_keys(vim.lsp.buf_get_clients(buffer.bufnr)))
+    return not vim.tbl_isempty(vim.tbl_keys(vim.lsp.get_clients { bufnr = buffer.bufnr }))
   end,
 
   is_active = function(buffer)
     return buffer.bufnr == vim.api.nvim_get_current_buf()
-  end
+  end,
 }
 
 local Buffer = {}
@@ -62,19 +61,17 @@ local buf_mt = {
 
     t[k] = result
     return t[k]
-  end
+  end,
 }
 
 function Buffer:new(bufnr)
   if bufnr == 0 then
-    bufnr = vim.api.nvim_buf_get_number(0)
+    bufnr = vim.api.nvim_get_current_buf()
   end
 
   return setmetatable({
-      bufnr = bufnr,
-    },
-    buf_mt
-  )
+    bufnr = bufnr,
+  }, buf_mt)
 end
 
 meta.Buffer = Buffer
@@ -92,7 +89,7 @@ local win_looksup = {
 
   is_active = function(window)
     return window.win_id == vim.api.nvim_get_current_win(), false
-  end
+  end,
 }
 
 local window_mt = {
@@ -110,7 +107,7 @@ local window_mt = {
     end
 
     return result
-  end
+  end,
 }
 
 function meta.Window:new(win_id)
