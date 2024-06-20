@@ -79,26 +79,21 @@ end
 
 --- Subscribe to a buffer autocmd with a lua callback.
 --
---@param identifier String: name of the variable we'll save to b:
---@param au_events String: The events to subscribe to
---@param callback Callable: A function that takes the (_, Buffer) style callback and returns a value
+--- @param identifier string: name of the variable we'll save to b:
+--- @param au_events string|table<string>: The events to subscribe to
+--- @param callback el.Item: A function that takes the (_, Buffer) style callback and returns a value
 subscribe.buf_autocmd = function(identifier, au_events, callback)
   return function(_, buffer)
     if _ElBufSubscriptions[buffer.bufnr][identifier] == nil then
       log.debug("Generating callback for", identifier, buffer.bufnr)
 
-      vim.cmd [[augroup ElBufSubscriptions]]
-      -- TODO: When we add native lua callbacks to neovim for autocmds, we can make this prettier.
-      vim.cmd(
-        string.format(
-          [[autocmd %s <buffer=%s> :lua require("el.subscribe")._process_buf_callback(%s, "%s")]],
-          au_events,
-          buffer.bufnr,
-          buffer.bufnr,
-          identifier
-        )
-      )
-      vim.cmd [[augroup END]]
+      vim.api.nvim_create_autocmd(au_events, {
+        group = "ElBufSubscriptions",
+        buffer = buffer.bufnr,
+        callback = function()
+          subscribe._process_buf_callback(buffer.bufnr, identifier)
+        end,
+      })
 
       _ElBufSubscriptions[buffer.bufnr][identifier] = callback
 
