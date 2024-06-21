@@ -8,7 +8,7 @@ local subscribe = require "el.subscribe"
 
 local lsp_statusline = require "el.plugins.lsp_status"
 
---- @alias el.Item fun(window, buffer): string
+--- @alias el.Item fun(window, buffer): string|nil
 
 local el = {}
 
@@ -165,18 +165,26 @@ el.setup = function(opts)
   el.reset_windows()
 
   -- Setup autocmds to make sure
-  vim.cmd [=[
-    augroup ExpressLineAutoSetup
-      au!
-      autocmd BufWinEnter,WinEnter * :lua vim.wo.statusline = string.format([[%%!luaeval('require("el").run(%s)')]], vim.api.nvim_get_current_win())
-  ]=]
+  local group_id = vim.api.nvim_create_augroup("ExpressLineAutoSetup", { clear = true })
+  vim.api.nvim_create_autocmd({ "BufWinEnter", "WinEnter" }, {
+    group = group_id,
+    pattern = "*",
+    callback = function()
+      vim.wo.statusline = string.format("%%!luaeval('require(\"el\").run(%s)')", vim.api.nvim_get_current_win())
+    end,
+  })
 
   for _, event in ipairs(regenerate_autocmds) do
-    vim.cmd(string.format([=[  autocmd %s * :lua require('el').regenerate(vim.api.nvim_get_current_win())]=], event))
+    vim.api.nvim_create_autocmd(event, {
+      group = group_id,
+      pattern = "*",
+      callback = function()
+        el.regenerate(vim.api.nvim_get_current_win())
+      end,
+    })
   end
 
-  vim.cmd [[augroup END]]
-  vim.cmd [[doautocmd BufWinEnter]]
+  vim.api.nvim_exec_autocmds("BufWinEnter", { group = group_id })
 end
 
 return el
