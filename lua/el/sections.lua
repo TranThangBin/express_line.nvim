@@ -67,10 +67,10 @@ sections.gen_one_highlight = function(contents)
 end
 
 --- Add highlight to some contents.
---@param higroup String|table: Name of the highlight group.
+--- @param higroup string|table: Name of the highlight group.
 --                              If string, then always set to this highlight group
 --                              If table, keys are `active` and `inactive` for different highlights
---@param contents String: The value of the contents
+--- @param contents string: The value of the contents
 sections.highlight = function(higroup, contents)
   if type(higroup) == "string" then
     if type(contents) == "table" then
@@ -116,9 +116,9 @@ sections.highlight = function(higroup, contents)
 end
 
 --- Filetype only sections.
----@param filetypes string|table If string, then only the name of the filetype
+--- @param filetypes string|table If string, then only the name of the filetype
 ---                              If table, then list of filetypes
----@param contents string|function  If string, return it.
+--- @param contents string|function  If string, return it.
 ---                                 If function, call function(win, buf)
 sections.filetype = function(filetypes, contents)
   local acceptable_fts = {}

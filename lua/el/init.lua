@@ -10,6 +10,12 @@ local lsp_statusline = require "el.plugins.lsp_status"
 
 --- @alias el.Item fun(window, buffer): string|nil
 
+--- @alias el.Generator fun(win_id: integer, bufnr: integer): table<string|el.Item>
+
+--- @class el.SetupOpts
+--- @field generator? el.Generator
+--- @field regenerate_autocmds? table<string>
+
 local el = {}
 
 ---@tag el
@@ -68,8 +74,7 @@ local get_new_windows_table = function()
           local buffer = meta.Buffer:new(bufnr)
           -- NOTE: i don't know what is happening here so just snooze the warning
           -- and is this function supposed to take 2 arguments
-          --- @diagnostic disable-next-line
-          local items = vim.iter(el.statusline_generator(window, buffer)):flatten():totable()
+          local items = vim.iter(el.statusline_generator(win_id, bufnr)):flatten():totable()
 
           local p = processor.new(items, window, buffer)
 
@@ -109,7 +114,7 @@ el.regenerate = function(win_id, bufnr)
   el._window_status_lines[win_id][bufnr] = nil
 end
 
-local default_statusline_generator = function( --[[ win_id ]])
+local default_statusline_generator = function()
   return {
     extensions.mode,
     sections.split,
@@ -150,7 +155,7 @@ el.run = function(win_id)
 end
 
 --- Default setup function
----@param opts table: el configuration table. Use key `generator` to pass a new statusline generator
+--- @param opts el.SetupOpts: el configuration table. Use key `generator` to pass a new statusline generator
 el.setup = function(opts)
   opts = opts or {}
 

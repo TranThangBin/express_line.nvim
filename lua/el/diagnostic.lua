@@ -3,6 +3,9 @@
 ---@tag el.diagnostic
 ---@config { module = 'el.diagnostic' }
 
+--- @alias el.DiagnosticCounts {errors: number, warnings: number, infos: number, hints: number}
+--- @alias el.DiagnosticFormatter fun(_, _, counts: el.DiagnosticCounts): string
+
 local severity = vim.diagnostic.severity
 
 local subscribe = require "el.subscribe"
@@ -37,7 +40,7 @@ end
 
 --- An item generator, used to create an item that shows diagnostic information
 --- for the current buffer
----@param formatter function: Optional, function(window, buffer, counts) -> string. Counts keys: ["errors", "warnings", "infos", "hints"]
+---@param formatter? el.DiagnosticFormatter
 diagnostic.make_buffer = function(formatter)
   if not formatter then
     formatter = function(_, _, counts)
