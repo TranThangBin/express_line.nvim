@@ -103,6 +103,8 @@ local mode_dispatch = setmetatable({}, {
   end,
 })
 
+--- @param opts? {format_string: string}
+--- @return function
 extensions.gen_mode = function(opts)
   opts = opts or {}
 
@@ -123,7 +125,7 @@ extensions.file_icon = function(_, buffer)
   return ok and icon or ""
 end
 
--- NOTE: snooze the unused local 
+-- NOTE: snooze the unused local
 --- @diagnostic disable-next-line
 extensions.git_icon = function(_, buffer)
   local ok, icon = pcall(function()

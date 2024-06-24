@@ -8,7 +8,7 @@ local subscribe = require "el.subscribe"
 
 local lsp_statusline = require "el.plugins.lsp_status"
 
---- @alias el.Item fun(window, buffer): string|nil
+--- @alias el.Item fun(window, buffer): string?
 
 --- @alias el.Generator fun(win_id: integer, bufnr: integer): table<string|el.Item>
 
