@@ -19,7 +19,17 @@
 --
 --      For example, whether this buffer contains a file in a git directory.
 --          buffer.is_git => function(buffer) return can_find_dot_git(buffer.path) end
+
 local meta = {}
+
+--- @class el.Buffer
+--- @field bufnr integer
+--- @field filetype string
+--- @field name string
+--- @field extension string
+--- @field is_git boolean
+--- @field lsp boolean
+--- @field is_active boolean
 
 local buf_lookups = {
   filetype = function(buffer)
@@ -29,6 +39,11 @@ local buf_lookups = {
   name = function(buffer)
     return vim.api.nvim_buf_get_name(buffer.bufnr)
   end,
+
+  -- name = function(buffer)
+  --   -- only filename instead of fullpath
+  --   return vim.fn.fnamemodify(buffer.fullpath, ":t")
+  -- end,
 
   extension = function(buffer)
     return vim.fn.fnamemodify(buffer.name, ":e")
@@ -64,6 +79,8 @@ local buf_mt = {
   end,
 }
 
+--- @param bufnr integer
+--- @return el.Buffer
 function Buffer:new(bufnr)
   if bufnr == 0 then
     bufnr = vim.api.nvim_get_current_buf()
@@ -77,6 +94,12 @@ end
 meta.Buffer = Buffer
 
 meta.Window = {}
+
+--- @class el.Window
+--- @field win_id integer
+--- @field width integer, boolean
+--- @field height integer, boolean
+--- @field is_active boolean, boolean
 
 local win_looksup = {
   width = function(window)
@@ -110,6 +133,8 @@ local window_mt = {
   end,
 }
 
+--- @param win_id integer
+--- @return el.Window
 function meta.Window:new(win_id)
   return setmetatable({
     win_id = win_id,

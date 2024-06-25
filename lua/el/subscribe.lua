@@ -81,7 +81,8 @@ end
 --
 --- @param identifier string: name of the variable we'll save to b:
 --- @param au_events string|table<string>: The events to subscribe to
---- @param callback el.Item: A function that takes the (_, Buffer) style callback and returns a value
+--- @param callback fun(_, buffer: el.Buffer): string? A function that takes the (_, Buffer) style callback and returns a value
+--- @return el.Item
 subscribe.buf_autocmd = function(identifier, au_events, callback)
   return function(_, buffer)
     if _ElBufSubscriptions[buffer.bufnr][identifier] == nil then

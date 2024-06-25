@@ -35,6 +35,7 @@ local parse_shortstat_output = function(s)
   return string.format("[%s]", table.concat(result, ", "))
 end
 
+--- @type el.Item
 extensions.git_changes = function(_, buffer)
   if
     vim.api.nvim_get_option_value("bufhidden", { buf = buffer.bufnr }) ~= ""
@@ -104,7 +105,7 @@ local mode_dispatch = setmetatable({}, {
 })
 
 --- @param opts? {format_string: string}
---- @return function
+--- @return el.Item
 extensions.gen_mode = function(opts)
   opts = opts or {}
 
@@ -118,6 +119,7 @@ end
 
 extensions.mode = extensions.gen_mode()
 
+--- @type el.Item
 extensions.file_icon = function(_, buffer)
   local ok, icon = pcall(function()
     return require("nvim-web-devicons").get_icon(buffer.name, buffer.extension, { default = true })
@@ -125,9 +127,8 @@ extensions.file_icon = function(_, buffer)
   return ok and icon or ""
 end
 
--- NOTE: snooze the unused local
---- @diagnostic disable-next-line
-extensions.git_icon = function(_, buffer)
+--- @type el.Item
+extensions.git_icon = function()
   local ok, icon = pcall(function()
     return require("nvim-web-devicons").get_icon ".gitattributes"
   end)

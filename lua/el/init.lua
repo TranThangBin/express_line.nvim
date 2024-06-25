@@ -8,7 +8,7 @@ local subscribe = require "el.subscribe"
 
 local lsp_statusline = require "el.plugins.lsp_status"
 
---- @alias el.Item fun(window, buffer): string?
+--- @alias el.Item string|fun(window: el.Window, buffer: el.Buffer): string?
 
 --- @alias el.Generator fun(win_id: integer, bufnr: integer): table<string|el.Item>
 
@@ -72,8 +72,6 @@ local get_new_windows_table = function()
           -- Gather up functions to use when evaluating statusline
           local window = meta.Window:new(win_id)
           local buffer = meta.Buffer:new(bufnr)
-          -- NOTE: i don't know what is happening here so just snooze the warning
-          -- and is this function supposed to take 2 arguments
           local items = vim.iter(el.statusline_generator(win_id, bufnr)):flatten():totable()
 
           local p = processor.new(items, window, buffer)
