@@ -25,6 +25,7 @@ local meta = {}
 --- @class el.Buffer
 --- @field bufnr integer
 --- @field filetype string
+--- @field fullpath string
 --- @field name string
 --- @field extension string
 --- @field is_git boolean
@@ -36,17 +37,16 @@ local buf_lookups = {
     return vim.api.nvim_get_option_value("filetype", { bufnr = buffer.bufnr })
   end,
 
-  name = function(buffer)
+  fullpath = function(buffer)
     return vim.api.nvim_buf_get_name(buffer.bufnr)
   end,
 
-  -- name = function(buffer)
-  --   -- only filename instead of fullpath
-  --   return vim.fn.fnamemodify(buffer.fullpath, ":t")
-  -- end,
+  name = function(buffer)
+    return vim.fn.fnamemodify(buffer.fullpath, ":t")
+  end,
 
   extension = function(buffer)
-    return vim.fn.fnamemodify(buffer.name, ":e")
+    return vim.fn.fnamemodify(buffer.fullpath, ":e")
   end,
 
   -- NOTE: snooze the unused local

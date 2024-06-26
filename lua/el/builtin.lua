@@ -11,16 +11,16 @@ local builtin = {}
 ---         directory.
 --- </pre>
 builtin.file = function(_, buffer)
-  if buffer.name == "" then
+  if buffer.fullpath == "" then
     return "[No Name]"
   end
 
-  return buffer.name
+  return buffer.fullpath
 end
 
 --- relative file
 builtin.file_relative = function(_, buffer)
-  if buffer.name == "" then
+  if buffer.fullpath == "" then
     return builtin.file(_, buffer)
   end
 
@@ -31,21 +31,21 @@ end
 ---   F S   Full path to the file in the buffer.
 --- </pre>
 builtin.full_file = function(_, buffer)
-  return vim.fn.fnamemodify(buffer.name, ":p")
+  return vim.fn.fnamemodify(buffer.fullpath, ":p")
 end
 
 --- Shortened file name, via |pathshorten|
 builtin.shortened_file = function(_, buffer)
-  if buffer.name == "" then
+  if buffer.fullpath == "" then
     return builtin.file(_, buffer)
   end
 
-  return vim.fn.pathshorten(vim.fn.fnamemodify(buffer.name, ":."))
+  return vim.fn.pathshorten(vim.fn.fnamemodify(buffer.fullpath, ":."))
 end
 
 --- Tail of the file name
 builtin.tail_file = function(_, buffer)
-  return vim.fn.fnamemodify(buffer.name, ":t")
+  return vim.fn.fnamemodify(buffer.fullpath, ":t")
 end
 
 ---   t S   File name (tail) of file in the buffer.

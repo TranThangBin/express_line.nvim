@@ -44,14 +44,14 @@ extensions.git_changes = function(_, buffer)
     return
   end
 
-  if vim.fn.filereadable(buffer.name) ~= 1 then
+  if vim.fn.filereadable(buffer.fullpath) ~= 1 then
     return
   end
 
   local j = Job:new {
     command = "git",
-    args = { "diff", "--shortstat", buffer.name },
-    cwd = vim.fn.fnamemodify(buffer.name, ":h"),
+    args = { "diff", "--shortstat", buffer.fullpath },
+    cwd = vim.fn.fnamemodify(buffer.fullpath, ":h"),
   }
 
   local ok, result = pcall(function()
@@ -67,7 +67,7 @@ extensions.git_branch = function(_, buffer)
   local j = Job:new {
     command = "git",
     args = { "branch", "--show-current" },
-    cwd = vim.fn.fnamemodify(buffer.name, ":h"),
+    cwd = vim.fn.fnamemodify(buffer.fullpath, ":h"),
   }
 
   local ok, result = pcall(function()
