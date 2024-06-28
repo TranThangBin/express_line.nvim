@@ -119,12 +119,30 @@ end
 
 extensions.mode = extensions.gen_mode()
 
---- @type el.Item
-extensions.file_icon = function(_, buffer)
-  local ok, icon = pcall(function()
-    return require("nvim-web-devicons").get_icon(buffer.name, buffer.extension, { default = true })
-  end)
-  return ok and icon or ""
+--- @param opts {format_string: string, color_icon: boolean}
+--- @return el.Item
+extensions.file_icon = function(opts)
+  return function(_, buffer)
+    opts = opts or {}
+
+    local format_string = opts.format_string or "%s"
+
+    local ok, icon, hi_group = pcall(function()
+      return require("nvim-web-devicons").get_icon(buffer.name, buffer.extension, { default = true })
+    end)
+
+    if not ok then
+      return ""
+    end
+
+    vim.api.nvim_set_hl(0, "ElFileIcon", { link = hi_group })
+
+    if not opts.color_icon then
+      return format_string:format(icon)
+    end
+
+    return sections.highlight({ active = "ElFileIcon" }, format_string:format(icon))(_, buffer)
+  end
 end
 
 --- @type el.Item
