@@ -121,21 +121,23 @@ end
 ---     end
 --- )
 ---</pre>
+--- @param identifier string
+--- @param au_events string|table<string>
+--- @param callback fun(_, buffer: el.Buffer): string?
+--- @return el.Item
 subscribe.user_autocmd = function(identifier, au_events, callback)
   return function(_, buffer)
     if _ElUserSubscriptions[buffer.bufnr][identifier] == nil then
       log.debug("Generating user callback for", identifier, buffer.bufnr)
 
-      vim.cmd [[augroup ElUserSubscriptions]]
-      vim.cmd(
-        string.format(
-          [[autocmd User %s :lua require("el.subscribe")._process_user_callback(%s, "%s")]],
-          au_events,
-          buffer.bufnr,
-          identifier
-        )
-      )
-      vim.cmd [[augroup END]]
+      local group_id = vim.api.nvim_create_augroup("ElUserSubscriptions", { clear = true })
+      vim.api.nvim_create_autocmd("User", {
+        group = group_id,
+        pattern = au_events,
+        callback = function()
+          subscribe._process_user_callback(buffer.bufnr, identifier)
+        end,
+      })
 
       _ElUserSubscriptions[buffer.bufnr][identifier] = callback
 
