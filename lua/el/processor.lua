@@ -1,4 +1,4 @@
-local meta = require('el.meta')
+local meta = require "el.meta"
 
 local processor = {}
 
@@ -26,13 +26,13 @@ function processor.new(items, window, buffer)
       local ok, result, effect = processor.resolve(v, window, buffer)
 
       if not ok then
-        statusline[k] = ''
+        statusline[k] = ""
       else
-        if type(result) == 'thread' then
+        if type(result) == "thread" then
           table.insert(waiting, {
             index = k,
             thread = result,
-            effect = effect
+            effect = effect,
           })
         else
           statusline[k], effects[k] = result, effect
@@ -56,7 +56,7 @@ function processor.new(items, window, buffer)
           local index, thread = wait_val.index, wait_val.thread
           local _, res = coroutine.resume(thread, window, buffer)
 
-          if coroutine.status(thread) == 'dead' then
+          if coroutine.status(thread) == "dead" then
             statusline[index] = res
 
             -- Remove
@@ -86,9 +86,9 @@ function processor.new(items, window, buffer)
 end
 
 processor.resolve = function(value, window, buffer)
-  if type(value) == 'string' then
+  if type(value) == "string" then
     return true, value
-  elseif type(value) == 'function' then
+  elseif type(value) == "function" then
     return pcall(value, window, buffer)
   else
     -- error("Unsupported type")
