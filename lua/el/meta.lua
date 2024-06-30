@@ -25,6 +25,7 @@ local meta = {}
 --- @class el.Buffer
 --- @field bufnr integer
 --- @field filetype string
+--- @field fileformat string
 --- @field fullpath string
 --- @field name string
 --- @field extension string
@@ -35,6 +36,10 @@ local meta = {}
 local buf_lookups = {
   filetype = function(buffer)
     return vim.api.nvim_get_option_value("filetype", { buf = buffer.bufnr })
+  end,
+
+  fileformat = function(buffer)
+    return vim.api.nvim_get_option_value("fileformat", { buf = buffer.bufnr })
   end,
 
   fullpath = function(buffer)
