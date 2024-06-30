@@ -34,7 +34,7 @@ local meta = {}
 
 local buf_lookups = {
   filetype = function(buffer)
-    return vim.api.nvim_get_option_value("filetype", { bufnr = buffer.bufnr })
+    return vim.api.nvim_get_option_value("filetype", { buf = buffer.bufnr })
   end,
 
   fullpath = function(buffer)
