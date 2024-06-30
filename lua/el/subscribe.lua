@@ -11,9 +11,7 @@ local subscribe = {}
 local _current_subscriptions = {}
 
 subscribe._reload = function()
-  vim.cmd [[augroup ElBufSubscriptions]]
-  vim.cmd [[  au! ]]
-  vim.cmd [[augroup END]]
+  vim.api.nvim_create_augroup("ElBufSubscriptions", { clear = true })
 
   _ElBufSubscriptions = setmetatable({}, {
     __index = function(t, k)
@@ -68,13 +66,6 @@ subscribe.autocmd = function(identifier, name, pattern, callback)
       subscribe._process_callbacks(#_current_callbacks)
     end,
   })
-
-  -- vim.cmd(string.format(
-  --   [[autocmd %s %s :lua require("el.subscribe")._process_callback(%s)]]<
-  --   name,
-  --   pattern,
-  --   #_current_callbacks
-  -- ))
 end
 
 --- Subscribe to a buffer autocmd with a lua callback.
@@ -88,8 +79,10 @@ subscribe.buf_autocmd = function(identifier, au_events, callback)
     if _ElBufSubscriptions[buffer.bufnr][identifier] == nil then
       log.debug("Generating callback for", identifier, buffer.bufnr)
 
+      local group_id = vim.api.nvim_create_augroup("ElBufSubscriptions", { clear = true })
+
       vim.api.nvim_create_autocmd(au_events, {
-        group = "ElBufSubscriptions",
+        group = group_id,
         buffer = buffer.bufnr,
         callback = function()
           subscribe._process_buf_callback(buffer.bufnr, identifier)
